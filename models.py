@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.linear_model import LogisticRegression, Ridge, Lasso
 from sklearn.model_selection import train_test_split, KFold, cross_val_score
+import xgboost as xgb
 
 # Data setup
 fraud_df = pd.read_csv('fraud.csv')
@@ -22,6 +23,17 @@ ridge_model.fit(cov_train, target_train)
 lasso_model = Lasso(alpha = 10)
 lasso_model.fit(cov_train, target_train)
 
+dtrain = xgb.DMatrix(cov_train, label = target_train)
+dtest = xgb.DMatrix(covd_test, label = target_test)
+params = {
+    'objective': 'binary:logistic',
+    'max_depth': 5,
+    'learning_rate': 0.1,
+    'eval_metric': 'logloss'
+}
+
+xgb_model = xgb.XGBClassifier(**params)
+
 # Find cross validation accuracy
 k_folds = KFold(10)
 scores = cross_val_score(model, cov, target, cv = k_folds)
@@ -32,3 +44,6 @@ print(ridge_scores.mean())
 
 lasso_scores = cross_val_score(lasso_model, cov, target, cv = k_folds)
 print(lasso_scores.mean())
+
+xgb_scores = cross_val_score(xgb_model, cov, target, cv = k_folds)
+print(xgb_scores.mean())
